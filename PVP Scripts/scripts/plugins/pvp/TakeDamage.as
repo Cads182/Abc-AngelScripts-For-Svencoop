@@ -1,7 +1,6 @@
 /***
 	Made by Dr.Abc
 ***/
-
 namespace TakeDamage
 {
 	HookReturnCode PlayerTakeDamage(DamageInfo@ info)
@@ -55,7 +54,11 @@ namespace TakeDamage
 				{
 						if( atkPlayer !is pPlayer )
 						{
-							g_PlayerFuncs.ClientPrintAll(HUD_PRINTNOTIFY, string(atkPlayer.pev.netname) + " :: "  + string(atkPlayer.m_hActiveItem.GetEntity().pev.classname) + " :: " + string(pPlayer.pev.netname) + "\n");
+						
+							if(CVoteArcade::g_IsArcade)
+								CVoteArcade::ApplyArcade( atkPlayer );
+								
+							g_PlayerFuncs.ClientPrintAll(HUD_PRINTNOTIFY, string(atkPlayer.pev.netname) + " :: ["  + KillWeaponName(atkPlayer, pInflictor) + "] :: " + string(pPlayer.pev.netname) + "\n");
 							atkPlayer.pev.frags++;
 							if(g_ReadFiles.IsScore())
 							{
@@ -109,7 +112,7 @@ namespace TakeDamage
 			}
 			else
 			{
-				AccidentDeathReason( pPlayer , bitsDamageType );
+				g_PlayerFuncs.ClientPrintAll(HUD_PRINTNOTIFY, AccidentDeathReason( pPlayer , bitsDamageType ) );
 				if(bitsDamageType & DMG_ALWAYSGIB != 0)
 				{
 					pPlayer.Killed(atkPlayer.pev, GIB_ALWAYS);
@@ -123,12 +126,89 @@ namespace TakeDamage
 					pPlayer.Killed(atkPlayer.pev, GIB_NORMAL);
 				}
 			}
+			g_DMDropRule.DropIt(pPlayer);
 			return 0;
 		}
 		return 1;
 	}
+	
+	string KillWeaponName(	CBasePlayer@ atkPlayer , CBaseEntity@ pInflictor )
+	{
+		string Inflicetor = pInflictor.GetClassname();
+		if( Inflicetor != "player" )
+		{
+			if( Inflicetor == "crossbow_bolt" )
+				return "Bolt";
+			else if( Inflicetor == "monster_snark" )
+				return "Snark";
+			else if( Inflicetor == "dmhornet" )
+				return "Hornet Gun";
+			else if( Inflicetor == "dm_shockbeam" )
+				return "Shock Rifle";
+			else
+				return Inflicetor;
+		}
+		else
+		{
+			Inflicetor = string(atkPlayer.m_hActiveItem.GetEntity().pev.classname);
+			if( Inflicetor == "weapon_crowbar" )
+				return "Crowbar";
+			else if( Inflicetor == "weapon_pipewrench" )
+				return "Pipe Wrench";
+			else if( Inflicetor == "weapon_grapple" )
+				return "Grapple";
+			else if( Inflicetor == "weapon_medkit" )
+				return "WTF A medkit kill";
+			else if( Inflicetor == "weapon_9mmhandgun" )
+				return "Pistol";
+			else if( Inflicetor == "weapon_357" || Inflicetor == "weapon_dm357")
+				return "Python 357";
+			else if( Inflicetor == "weapon_eagle" )
+				return "Desert Eagle";
+			else if( Inflicetor == "weapon_uzi" )
+				return "UZI";
+			else if( Inflicetor == "weapon_9mmAR" || Inflicetor == "weapon_hlmp5")
+				return "MP5";
+			else if( Inflicetor == "weapon_shotgun" )
+				return "Shotgun";
+			else if( Inflicetor == "weapon_crossbow" || Inflicetor == "weapon_dmbow")
+				return "Crossbow";
+			else if( Inflicetor == "weapon_m16" )
+				return "M16";
+			else if( Inflicetor == "weapon_rpg" )
+				return "RPG";
+			else if( Inflicetor == "weapon_gauss" || Inflicetor == "weapon_dmgauss" )
+				return "Gauss";
+			else if( Inflicetor == "weapon_egon" )
+				return "Egon";
+			else if( Inflicetor == "weapon_hornetgun" || Inflicetor == "weapon_dmhornetgun")
+				return "Hornet Gun";
+			else if( Inflicetor == "weapon_handgrenade" )
+				return "Hand Grenade";
+			else if( Inflicetor == "weapon_tripmine" )
+				return "Trip Mine";
+			else if( Inflicetor == "weapon_satchel" )
+				return "Satchel";
+			else if( Inflicetor == "weapon_snark" || Inflicetor == "weapon_dmsnark")
+				return "Snark";
+			else if( Inflicetor == "weapon_sniperrifle" )
+				return "Sniper Rifle";
+			else if( Inflicetor == "weapon_m249" )
+				return "M249";
+			else if( Inflicetor == "weapon_sporelauncher" )
+				return "Spore Launcher";	
+			else if( Inflicetor == "weapon_displacer" )
+				return "Displacer";	
+			else if( Inflicetor == "weapon_minigun" )
+				return "Minigun";	
+			else if( Inflicetor == "weapon_shockrifle" || Inflicetor == "weapon_dmshockrifle" )
+				return "Shock Rifle";	
+			else
+				return Inflicetor;
+		}
+	}
 
-	void AccidentDeathReason( CBasePlayer@ pPlayer , int bitsDamageType )
+	string AccidentDeathReason( CBasePlayer@ pPlayer , int bitsDamageType )
 	{
 		string AccDeathReason;
 		if(bitsDamageType & DMG_FALL != 0)
@@ -227,7 +307,7 @@ namespace TakeDamage
 				case 1 : AccDeathReason = "Strange forces killed " + string(pPlayer.pev.netname) + ". \n";break;
 			}
 		}
-		g_PlayerFuncs.ClientPrintAll(HUD_PRINTNOTIFY, AccDeathReason );
+		return AccDeathReason;
 	}
 
 }

@@ -9,7 +9,6 @@ namespace PVPTeam
 
 	void TeamPluginInt()
 	{
-		TeamMenu.Unregister();
 		TeamMenu.Register();
 		TeamMenu.AddItem("Team Lambda", null);
 		TeamMenu.AddItem("Team HECU", null);
@@ -26,7 +25,7 @@ namespace PVPTeam
 		{
 			++uint_PlayerTeam;
 			if (uint_PlayerTeam == 1)
-				++uint_PlayerTeam;
+				uint_PlayerTeam = 3;
 			g_EntityFuncs.DispatchKeyValue(pPlayer.edict(), "classify", uint_PlayerTeam );
 			return HOOK_HANDLED;
 		}

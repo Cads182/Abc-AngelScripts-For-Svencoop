@@ -38,6 +38,7 @@ class weapon_dmsnark : ScriptBasePlayerWeaponEntity
 		self.m_iDefaultAmmo = 5;
 		self.FallInit();
 	}
+	
 	void Precache()
 	{
 		self.PrecacheCustomModels();
@@ -48,6 +49,7 @@ class weapon_dmsnark : ScriptBasePlayerWeaponEntity
 		g_SoundSystem.PrecacheSound("squeek/sqk_hunt3.wav" );
 		g_Game.PrecacheGeneric( "sprites/dm_weapons/weapon_dmsnark.txt" );
 	}
+	
 	bool GetItemInfo( ItemInfo& out info )
 	{
 		info.iMaxAmmo1 	= 10;
@@ -59,6 +61,7 @@ class weapon_dmsnark : ScriptBasePlayerWeaponEntity
 		info.iWeight 	= 8;
 		return true;
 	}
+	
 	bool AddToPlayer( CBasePlayer@ pPlayer )
 	{
 		if( BaseClass.AddToPlayer( pPlayer ) == true )
@@ -113,6 +116,37 @@ class weapon_dmsnark : ScriptBasePlayerWeaponEntity
 		self.SendWeaponAnim( SQUEAK_DOWN, 0, 0 );
 		BaseClass.Holster( skipLocal );
 	}	
+	
+	void Materialize()
+	{
+		BaseClass.Materialize();
+		
+		SetTouch( TouchFunction( CustomTouch ) );
+	}
+	
+	void CustomTouch( CBaseEntity@ pOther )
+	{
+		if( !pOther.IsPlayer() )
+			return;
+
+		CBasePlayer@ pPlayer = cast<CBasePlayer@> (pOther);
+
+		if( pPlayer.HasNamedPlayerItem( "weapon_dmsnark" ) !is null ) 
+		{
+			if( pPlayer.GiveAmmo( self.m_iDefaultAmmo, "weapon_dmsnark", 10 ) != -1 )
+			{
+				self.CheckRespawn();
+				g_SoundSystem.EmitSound( self.edict(), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
+				g_EntityFuncs.Remove( self );
+			}
+			return;
+		}
+		else if( pPlayer.AddPlayerItem( self ) != APIR_NotAdded )
+		{
+			self.AttachToPlayer( pPlayer );
+			g_SoundSystem.EmitSound( self.edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+		}
+	}
 	
 	void DestroyThink()
 	{
@@ -201,5 +235,5 @@ string GetWeaponNameDMSnark()
 void RegisterDMSnark()
 {
 	g_CustomEntityFuncs.RegisterCustomEntity( GetWeaponNameDMSnark(), GetWeaponNameDMSnark() );
-	g_ItemRegistry.RegisterWeapon( GetWeaponNameDMSnark(), "dm_weapons", "squeak" );
+	g_ItemRegistry.RegisterWeapon( GetWeaponNameDMSnark(), "dm_weapons", "snarks" );
 }

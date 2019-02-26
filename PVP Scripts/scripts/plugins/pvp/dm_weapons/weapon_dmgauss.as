@@ -84,7 +84,7 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 		g_SoundSystem.PrecacheSound( "weapons/electro6.wav" );
 		g_SoundSystem.PrecacheSound( "ambience/pulsemachine.wav" );
 		g_SoundSystem.PrecacheSound( "weapons/gauss2.wav" );
-		g_SoundSystem.PrecacheSound( "hlclassic/weapons/357_cock1.wav" );
+		g_SoundSystem.PrecacheSound( "weapons/357_cock1.wav" );
 		g_Game.PrecacheGeneric( "sprites/dm_weapons/weapon_dmgauss.txt" );
 	}
 	
@@ -333,7 +333,7 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 
 		m_pPlayer.pev.punchangle.x = -2.0f;
 		g_SoundSystem.PlaySound( m_pPlayer.edict(), CHAN_WEAPON, "weapons/gauss2.wav", 1, ATTN_NORM, 0, 95 + Math.RandomLong( 0, 10 ) );
-		self.SendWeaponAnim( GAUSS_FIRE );
+		self.SendWeaponAnim( GAUSS_FIRE2 );
 		
 		/*ALERT( at_console, "%f %f %f\n%f %f %f\n", 
 			vecSrc.x, vecSrc.y, vecSrc.z, 

@@ -98,9 +98,10 @@ class weapon_dmshockrifle : ScriptBasePlayerWeaponEntity
 	void Holster( int skipLocal = 0 )
 	{
 		RechargeAmmo( false );
-			self.pev.nextthink = g_Engine.time + 1.0;
+		SetThink( null );
+		self.pev.nextthink = g_Engine.time + 1.0;
 		self.SendWeaponAnim( SHOCKRIFLE_HOLSTER, 0, 0 );
-		if( m_pPlayer.m_rgAmmo( self.m_iPrimaryAmmoType ) == 0 )
+		if ( m_pPlayer.m_rgAmmo( self.m_iPrimaryAmmoType ) <= 0 )
 			m_pPlayer.m_rgAmmo( self.m_iPrimaryAmmoType, 1 );
 		BaseClass.Holster( skipLocal );
 	}	

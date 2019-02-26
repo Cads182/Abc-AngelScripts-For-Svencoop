@@ -181,8 +181,6 @@ class dm_shockbeam : ScriptBaseMonsterEntity
 	}
 }
 
-dm_shockbeam g_ShockBeam;
-
 string GetNameProjShockBeam()
 {
 	return "dm_shockbeam";

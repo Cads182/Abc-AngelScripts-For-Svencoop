@@ -92,12 +92,6 @@ class weapon_dmbow : ScriptBasePlayerWeaponEntity
 	}
 	void PrimaryAttack()
 	{
-		if( m_pPlayer.pev.waterlevel == WATERLEVEL_HEAD )
-		{
-			self.PlayEmptySound( );
-			self.m_flNextPrimaryAttack = WeaponTimeBase() + 0.75;
-			return;
-		}
 		if( self.m_iClip <= 0 )
 		{
 			self.PlayEmptySound();

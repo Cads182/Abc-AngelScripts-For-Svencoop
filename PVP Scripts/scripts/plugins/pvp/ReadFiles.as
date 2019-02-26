@@ -78,7 +78,9 @@ class CReadFiles
 		g_Hooks.RemoveHook(Hooks::Player::ClientPutInServer, @PVPTeam::ClientPutInServer);
 		g_Hooks.RemoveHook(Hooks::Player::ClientDisconnect, @PVPTeam::ClientDisconnect);
 		g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @TakeDamage::PlayerTakeDamage);
+		g_Hooks.RemoveHook(Hooks::Player::PlayerSpawn, @PlayerSpawn);
 		g_CustomEntityFuncs.UnRegisterCustomEntity( "info_ctfspawn" );
+		g_CustomEntityFuncs.UnRegisterCustomEntity( "item_dmweaponpack" );
 	}
 	
 	void deleteAll()
@@ -96,7 +98,9 @@ class CReadFiles
 		{
 			g_Hooks.RegisterHook(Hooks::Player::ClientPutInServer, @PVPTeam::ClientPutInServer);
 			g_Hooks.RegisterHook(Hooks::Player::PlayerTakeDamage, @TakeDamage::PlayerTakeDamage);
+			g_Hooks.RegisterHook(Hooks::Player::PlayerSpawn, @PlayerSpawn);
 			g_CustomEntityFuncs.RegisterCustomEntity( "info_ctfspawn", "info_ctfspawn" );
+			g_CustomEntityFuncs.RegisterCustomEntity( "item_dmweaponpack", "item_dmweaponpack" );
 			
 			@HUDStart = g_Scheduler.SetInterval( "RefreshHUD", 1, g_Scheduler.REPEAT_INFINITE_TIMES );
 			
@@ -107,7 +111,6 @@ class CReadFiles
 			
 			m_bIsTDM = IsTDM();
 			m_bIsScore = IsScore();
-
 			return true;
 		}
 		return false;
@@ -118,7 +121,6 @@ class CReadFiles
 		string lowcasemapname = string(g_Engine.mapname).ToLowercase();
 		if (int8 (g_PVPMapList[lowcasemapname]) == 1 || int8 (g_PVPMapList[lowcasemapname]) == 2 ) 
 		{
-			PVPTeam::TeamPluginInt();
 			g_Hooks.RegisterHook(Hooks::Player::ClientDisconnect, @PVPTeam::ClientDisconnect);
 			return true;
 		}
