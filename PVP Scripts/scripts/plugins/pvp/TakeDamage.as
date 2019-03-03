@@ -3,28 +3,14 @@
 ***/
 namespace TakeDamage
 {
-	HookReturnCode PlayerTakeDamage(DamageInfo@ info)
+	const float m_flRespwantime = g_EngineFuncs.CVarGetFloat("mp_respawndelay");
+	bool TakeDamege(CBasePlayer@ pPlayer,CBasePlayer@ atkPlayer, CBaseEntity@ pInflictor, float flDamage, int bitsDamageType)
 	{
-		CBasePlayer@ pPlayer = cast<CBasePlayer@>(g_EntityFuncs.Instance(info.pVictim.pev));
-		CBasePlayer@ pAttacker = cast<CBasePlayer@>(g_EntityFuncs.Instance(info.pAttacker.pev));
-		CBaseEntity@ pInflictor = cast<CBaseEntity@>(g_EntityFuncs.Instance(info.pInflictor.pev));
-		if (pPlayer !is null && pAttacker !is null && pInflictor!is null && ((pPlayer.Classify() == pAttacker.Classify())))
-		{
-			if( pPlayer !is pAttacker )
-			{
-					return HOOK_CONTINUE;
-			}
-		}
-		TakeDamege(pPlayer,pAttacker,pInflictor,info.flDamage,info.bitsDamageType);
-		info.flDamage = 0;
-		return HOOK_CONTINUE;
-	}
-	
-	int TakeDamege(CBasePlayer@ pPlayer,CBasePlayer@ atkPlayer, CBaseEntity@ pInflictor, float flDamage, int bitsDamageType)
-	{
+		if(pPlayer is null)
+			return false;
 		float flBonus = ARMOR_BONUS;
 		if ( !pPlayer.IsAlive() )
-			return 0;
+			return true;
 		pPlayer.m_lastDamageAmount = int(flDamage); 
 		if (pPlayer.pev.armorvalue != 0 && !(bitsDamageType & (DMG_FALL | DMG_DROWN) != 0) )
 		{
@@ -50,11 +36,10 @@ namespace TakeDamage
 		{
 			if(atkPlayer !is null && atkPlayer.IsPlayer() && atkPlayer.IsNetClient())
 			{
-				if(g_Engine.time - pPlayer.m_fDeadTime > g_EngineFuncs.CVarGetFloat("mp_respawndelay"))
+				if(g_Engine.time - pPlayer.m_fDeadTime > m_flRespwantime)
 				{
 						if( atkPlayer !is pPlayer )
 						{
-						
 							if(CVoteArcade::g_IsArcade)
 								CVoteArcade::ApplyArcade( atkPlayer );
 								
@@ -94,9 +79,7 @@ namespace TakeDamage
 							--pPlayer.pev.frags;
 						}
 					if( flTake <= 200 )
-					{
 						pPlayer.SetAnimation( PLAYER_DIE );
-					}
 					else
 					{	
 						pPlayer.pev.rendermode = 1;
@@ -104,15 +87,14 @@ namespace TakeDamage
 						g_EntityFuncs.SpawnRandomGibs(pPlayer.pev, 1, 1);
 						g_SoundSystem.PlaySound(pPlayer.edict(), CHAN_AUTO, "common/bodysplat.wav", 1.0f, 1.0f);
 					}
-					pPlayer.pev.health = 0;
-					pPlayer.pev.armorvalue = 0;
-					pPlayer.pev.deadflag = DEAD_DYING;
 					++pPlayer.m_iDeaths;
 				}
 			}
 			else
 			{
 				g_PlayerFuncs.ClientPrintAll(HUD_PRINTNOTIFY, AccidentDeathReason( pPlayer , bitsDamageType ) );
+				if(atkPlayer is null)
+					atkPlayer is pPlayer;
 				if(bitsDamageType & DMG_ALWAYSGIB != 0)
 				{
 					pPlayer.Killed(atkPlayer.pev, GIB_ALWAYS);
@@ -126,10 +108,12 @@ namespace TakeDamage
 					pPlayer.Killed(atkPlayer.pev, GIB_NORMAL);
 				}
 			}
-			g_DMDropRule.DropIt(pPlayer);
-			return 0;
+			pPlayer.pev.health = 0;
+			pPlayer.pev.armorvalue = 0;
+			pPlayer.pev.deadflag = DEAD_DYING;
+			return true;
 		}
-		return 1;
+		return false;
 	}
 	
 	string KillWeaponName(	CBasePlayer@ atkPlayer , CBaseEntity@ pInflictor )
@@ -145,6 +129,10 @@ namespace TakeDamage
 				return "Hornet Gun";
 			else if( Inflicetor == "dm_shockbeam" )
 				return "Shock Rifle";
+			else if( Inflicetor == "rpg_rocket" )
+				return "RPG";
+			else if( Inflicetor == "weapon_gauss" || Inflicetor == "weapon_dmgauss" )
+				return "Gauss";
 			else
 				return Inflicetor;
 		}
@@ -309,5 +297,4 @@ namespace TakeDamage
 		}
 		return AccDeathReason;
 	}
-
 }

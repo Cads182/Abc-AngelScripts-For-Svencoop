@@ -1,12 +1,10 @@
-/***
-	Inspired from w00tguy's Classic Mode Deluxe: https://forums.svencoop.com/showthread.php/45371-Classic-Mode-Deluxe
-  
+/*** 
 	PVP Enable
 	Dr.Abc
 	Dr.Abc@foxmail.com
 ***/
 
-//Stream
+//Core
 #include "pvp/HUD"
 #include "pvp/Team"
 #include "pvp/Hooks"
@@ -17,6 +15,7 @@
 #include "pvp/DropBox"
 #include "pvp/VoteRule"
 #include "pvp/Arcade"
+#include "pvp/LMS"
 
 //Setting
 const float g_WaitingTime = 30;						//TDM Waiting Time
@@ -25,8 +24,8 @@ const int g_iBanlance = 3;						//The gap for autobalance (minimum is 2)
 const int g_LeftTime = 600;						//Default Game time
 const int g_MaxScore = 50;						//Defalut Max team score
 const int HUD_CHAN_PVP = 14;						//HUD Channel
-const string g_PVPMapFile = "scripts/plugins/PVPMapList.cfg";		//file name
-const string g_PVPSkillFile = "scripts/plugins/pvp_skl.txt";		//file name
+const string g_PVPMapFile = "scripts/plugins/pvp/config/PVPMapList.ini";		//file name
+const string g_PVPSkillFile = "scripts/plugins/pvp/config/pvp_skl.ini";		//file name
 const string MenuTitle = "Chose Your Team";			//Chose Your Team
 const bool IsClassMode 	= true;						//Is classic Mode
 const float ARMOR_RATIO = 0.2f; 					//80% Ratio
@@ -48,6 +47,8 @@ void MapInit()
 	g_ReadFiles.IsPVP();
 	g_DMDropRule.ApplyDropRule();
 	g_DMClassMode.EnableClassMode( IsClassMode );
+	g_SurvivalMode.EnableMapSupport();
+	g_LMSMode.LMSModeInitialized();
 }
 
 void MapActivate()

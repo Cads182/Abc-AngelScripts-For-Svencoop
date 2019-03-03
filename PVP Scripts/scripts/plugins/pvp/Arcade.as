@@ -31,14 +31,13 @@ namespace CVoteArcade
 		"weapon_m16",
 		"weapon_sporelauncher",
 		"weapon_eagle",
-		"weapon_displacer",
-		"item_longjump"};
+		"weapon_displacer"};
 
 	array<string> giveClassicAllList = {
 		"weapon_crowbar",
 		"weapon_9mmhandgun",
 		"weapon_dm357",
-		"weapon_9mmAR",
+		"weapon_hlmp5",
 		"weapon_dmbow",
 		"weapon_shotgun",
 		"weapon_rpg",
@@ -58,8 +57,7 @@ namespace CVoteArcade
 		"weapon_sporelauncher",
 		"weapon_eagle",
 		"weapon_dmshockrifle",
-		"weapon_displacer",
-		"item_longjump"};
+		"weapon_displacer"};
 
 	array<string> giveAmmoList = {
 		"buckshot",
@@ -110,16 +108,20 @@ namespace CVoteArcade
 			g_PlayerFuncs.ClientPrintAll( HUD_PRINTNOTIFY, "Vote for Arcade play failed" );
 			return;
 		}
-		g_PlayerFuncs.ClientPrintAll( HUD_PRINTNOTIFY, "Vote to " + ( !g_IsArcade ? "Disable" : "Enable" ) + " Arcade play passed\n" );
-		g_IsArcade = true;
-		for (int i = 1; i <= g_Engine.maxClients; i++)
+		g_PlayerFuncs.ClientPrintAll( HUD_PRINTNOTIFY, "Vote to " + ( g_IsArcade ? "Disable" : "Enable" ) + " Arcade play passed\n" );
+		
+		if(!g_IsArcade)
 		{
-			CBasePlayer@ pPlayer = g_PlayerFuncs.FindPlayerByIndex(i);
-			if(pPlayer !is null && pPlayer.IsConnected())
+			g_IsArcade = true;
+			for (int i = 1; i <= g_Engine.maxClients; i++)
 			{
-				ApplyArcade( pPlayer );
+				CBasePlayer@ pPlayer = g_PlayerFuncs.FindPlayerByIndex(i);
+				if(pPlayer !is null && pPlayer.IsConnected())
+					ApplyArcade( pPlayer );
 			}
 		}
+		else
+			g_IsArcade = false;
 	}
 	
 	void DMArcadeVoteCallback( const CCommand@ pArgs )
@@ -155,6 +157,10 @@ namespace CVoteArcade
 			int m_iAmmoIndex = g_PlayerFuncs.GetAmmoIndex(giveAmmoList[u]);
 			pPlayer.m_rgAmmo(m_iAmmoIndex , pPlayer.GetMaxAmmo(m_iAmmoIndex));
 		}
+		
+		//CBasePlayerItem@ pItem = pPlayer.HasNamedPlayerItem("item_longjump");
+		//if( pItem is null)
+		//	pPlayer.GiveNamedItem("item_longjump", 0, 0);
 		
 		if (m_stractiveItem.Length() > 0)
 			pPlayer.SelectItem(m_stractiveItem);

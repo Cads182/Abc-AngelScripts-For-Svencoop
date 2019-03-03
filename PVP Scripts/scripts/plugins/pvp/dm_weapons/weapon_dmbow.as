@@ -144,6 +144,7 @@ class weapon_dmbow : ScriptBasePlayerWeaponEntity
 					{
 						g_WeaponFuncs.DecalGunshot( tr, BULLET_PLAYER_MP5 );
 						CBaseEntity@ pBolt = g_EntityFuncs.Create("crossbow_bolt", tr.vecEndPos, m_pPlayer.pev.v_angle, false, m_pPlayer.edict());
+						pBolt.pev.dmg = 0;
 						pBolt.pev.velocity = vecSpeed;
 						pBolt.pev.angles = Math.VecToAngles( pBolt.pev.velocity );
 					}

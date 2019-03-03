@@ -4,17 +4,20 @@
 
 int g_TiemLeft,m_iTeam1,m_iTeam2,flDamage,m_iScoreTeam1,m_iScoreTeam2,g_MapMaxScore;
 float format_float;
-uint8 uint_PlayerTeam,iEndTime,WarnTime;
+uint8 uint_PlayerTeam = 3,iEndTime,WarnTime;
 bool m_bIsTDM,m_bIsStart,m_bIsScore,m_bIsWarining;
 
+class CMapData{ int8 MapMode; int MapTime; }
+class CSkilldata{ string SkillName; float SkillValue; }
 class CReadFiles
 {
 	CScheduledFunction@ HUDStart;
-	dictionary g_PVPMapList,g_PVPMapTimeTable,g_PVPSkillList,g_PVPSkillValue;
-	array<string> @g_SklListVals;
-	
+	dictionary g_PVPMapList,g_PVPSkillList;
+	array<CSkilldata> g_SklListVals;
+
 	void ReadMaps() 
 	{
+		CMapData data;
 		File@ file = g_FileSystem.OpenFile(g_PVPMapFile, OpenFile::READ);
 		if (file !is null && file.IsOpen()) 
 		{
@@ -23,21 +26,23 @@ class CReadFiles
 				string sLine;
 				file.ReadLine(sLine);
 				if (sLine.SubString(0,1) == "//" || sLine.IsEmpty())
-				continue;
+					continue;
 
 				array<string> parseds = sLine.Split(" ");
 				if (parseds.length() < 3)
-				continue;
-
-			g_PVPMapList[parseds[0].ToLowercase()] = atoi(parseds[1]);
-			g_PVPMapTimeTable[parseds[0].ToLowercase()] = atoi(parseds[2]);
+					continue;
+			
+				data.MapMode = atoi(parseds[1]);
+				data.MapTime = atoi(parseds[2]);
+				g_PVPMapList[parseds[0].ToLowercase()] = data;
 			}
-		file.Close();
+			file.Close();
 		}
 	}
 
 	void ReadSkills() 
 	{
+		CSkilldata data;
 		File@ file = g_FileSystem.OpenFile(g_PVPSkillFile, OpenFile::READ);
 		if (file !is null && file.IsOpen()) 
 		{
@@ -51,19 +56,21 @@ class CReadFiles
 				array<string> parsed = sLine.Split(" ");
 				if (parsed.length() < 2)
 					continue;
-				g_PVPSkillList[parsed[0]] = parsed[0];
-				g_PVPSkillValue[parsed[0]] = atoi(parsed[1]);
+				
+				data.SkillName = parsed[0];
+				data.SkillValue = atof(parsed[1]);
+				g_SklListVals.insertLast( data );
 			}
-		file.Close();
-		@g_SklListVals = g_PVPSkillValue.getKeys();
+			file.Close();
 		}
 	}
 	
 	void ApplySkills()
 	{
-		for (uint i = 1; i < g_SklListVals.length()+1; ++i) 
+		for (uint i = 0; i < g_SklListVals.length(); ++i) 
 		{
-			g_EngineFuncs.CVarSetFloat( string(g_PVPSkillList[g_SklListVals[i-1]]), float(g_PVPSkillValue[g_SklListVals[i-1]]));
+			const CSkilldata@ data = cast<CSkilldata@>(g_SklListVals[i]);
+			g_EngineFuncs.CVarSetFloat( data.SkillName, data.SkillValue );
 		}
 	}
 	
@@ -73,11 +80,11 @@ class CReadFiles
 		m_bIsTDM = m_bIsStart = m_bIsScore = m_bIsWarining = false;
 		m_iTeam1 = m_iTeam2 = m_iScoreTeam1 = m_iScoreTeam2 = 0;
 		iEndTime = WarnTime = 0;
-		uint_PlayerTeam = 0;
+		uint_PlayerTeam = 3;
 		g_Scheduler.ClearTimerList();
-		g_Hooks.RemoveHook(Hooks::Player::ClientPutInServer, @PVPTeam::ClientPutInServer);
-		g_Hooks.RemoveHook(Hooks::Player::ClientDisconnect, @PVPTeam::ClientDisconnect);
-		g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @TakeDamage::PlayerTakeDamage);
+		g_Hooks.RemoveHook(Hooks::Player::ClientPutInServer, @ClientPutInServer);
+		g_Hooks.RemoveHook(Hooks::Player::ClientDisconnect, @ClientDisconnect);
+		g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage);
 		g_Hooks.RemoveHook(Hooks::Player::PlayerSpawn, @PlayerSpawn);
 		g_CustomEntityFuncs.UnRegisterCustomEntity( "info_ctfspawn" );
 		g_CustomEntityFuncs.UnRegisterCustomEntity( "item_dmweaponpack" );
@@ -86,18 +93,16 @@ class CReadFiles
 	void deleteAll()
 	{
 		g_PVPMapList.deleteAll();
-		g_PVPMapTimeTable.deleteAll();
-		g_PVPSkillList.deleteAll();
-		g_PVPSkillValue.deleteAll();
+		g_SklListVals = {};
 	}
 	
 	bool IsPVP()
 	{
-		string lowcasemapname = string(g_Engine.mapname).ToLowercase();
-		if(g_PVPMapList.exists(lowcasemapname))
+		string szMapName = string(g_Engine.mapname).ToLowercase();
+		if(g_PVPMapList.exists(szMapName))
 		{
-			g_Hooks.RegisterHook(Hooks::Player::ClientPutInServer, @PVPTeam::ClientPutInServer);
-			g_Hooks.RegisterHook(Hooks::Player::PlayerTakeDamage, @TakeDamage::PlayerTakeDamage);
+			g_Hooks.RegisterHook(Hooks::Player::ClientPutInServer, @ClientPutInServer);
+			g_Hooks.RegisterHook(Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage);
 			g_Hooks.RegisterHook(Hooks::Player::PlayerSpawn, @PlayerSpawn);
 			g_CustomEntityFuncs.RegisterCustomEntity( "info_ctfspawn", "info_ctfspawn" );
 			g_CustomEntityFuncs.RegisterCustomEntity( "item_dmweaponpack", "item_dmweaponpack" );
@@ -118,10 +123,11 @@ class CReadFiles
 	
 	bool IsTDM()
 	{
-		string lowcasemapname = string(g_Engine.mapname).ToLowercase();
-		if (int8 (g_PVPMapList[lowcasemapname]) == 1 || int8 (g_PVPMapList[lowcasemapname]) == 2 ) 
+		string szMapName = string(g_Engine.mapname).ToLowercase();
+		const CMapData@ data = cast<CMapData@>(g_PVPMapList[szMapName]);
+		if ( data.MapMode == 1 || data.MapMode == 2 ) 
 		{
-			g_Hooks.RegisterHook(Hooks::Player::ClientDisconnect, @PVPTeam::ClientDisconnect);
+			g_Hooks.RegisterHook(Hooks::Player::ClientDisconnect, @ClientDisconnect);
 			return true;
 		}
 		return false;
@@ -129,10 +135,11 @@ class CReadFiles
 	
 	bool IsScore()
 	{
-		string lowcasemapname = string(g_Engine.mapname).ToLowercase();
-		if (int8 (g_PVPMapList[lowcasemapname]) == 2 ) 
+		string szMapName = string(g_Engine.mapname).ToLowercase();
+		const CMapData@ data = cast<CMapData@>(g_PVPMapList[szMapName]);
+		if (data.MapMode == 2 ) 
 		{
-			g_MapMaxScore = (!g_PVPMapTimeTable.exists(g_Engine.mapname) || int8 (g_PVPMapTimeTable[g_Engine.mapname]) == 0 ) ? g_MaxScore : int8 (g_PVPMapTimeTable[g_Engine.mapname]);
+			g_MapMaxScore = data.MapTime == 0 ? g_MaxScore : data.MapTime;
 			g_Game.PrecacheModel("sprites/misc/hecu.spr");
 			g_Game.PrecacheModel("sprites/misc/lambda.spr");
 			g_SoundSystem.PrecacheSound("vox/victor.wav");
@@ -140,7 +147,7 @@ class CReadFiles
 		}
 		else
 		{
-			g_TiemLeft = (!g_PVPMapTimeTable.exists(g_Engine.mapname) || int8 (g_PVPMapTimeTable[g_Engine.mapname]) == 0 ) ? g_LeftTime : int8 (g_PVPMapTimeTable[g_Engine.mapname]);
+			g_TiemLeft = data.MapTime == 0 ? g_LeftTime : data.MapTime;
 			return false;
 		}
 	}

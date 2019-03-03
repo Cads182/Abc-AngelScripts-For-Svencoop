@@ -14,37 +14,6 @@ namespace PVPTeam
 		TeamMenu.AddItem("Team HECU", null);
 		TeamMenu.SetTitle("[" + MenuTitle + "]\n");
 	}
-
-	HookReturnCode ClientPutInServer(CBasePlayer@ pPlayer)
-	{
-		pPlayer.pev.targetname = "normalplayer";
-		pPlayer.pev.solid	   = SOLID_BBOX;
-		g_EntityFuncs.DispatchKeyValue(pPlayer.edict(), "classify", 0 );
-		CCommandApplyer(pPlayer,"cl_updaterate 102;cl_cmdrate 999;cl_cmdbackup 999");
-		if(!m_bIsTDM)
-		{
-			++uint_PlayerTeam;
-			if (uint_PlayerTeam == 1)
-				uint_PlayerTeam = 3;
-			g_EntityFuncs.DispatchKeyValue(pPlayer.edict(), "classify", uint_PlayerTeam );
-			return HOOK_HANDLED;
-		}
-		return HOOK_HANDLED;
-	}
-
-	HookReturnCode ClientDisconnect(CBasePlayer@ pPlayer )
-	{
-		if(pPlayer.pev.targetname == "team1")
-		{
-			--m_iTeam1;
-		}
-		if(pPlayer.pev.targetname == "team2")
-		{
-			--m_iTeam2;
-		}
-		CCommandApplyer(pPlayer,"cl_updaterate 101;cl_cmdrate 132;cl_cmdbackup 1");
-		return HOOK_HANDLED;
-	}
 	
 	void CCommandApplyer(CBasePlayer@ pPlayer, const string Arg)
 	{
@@ -151,14 +120,14 @@ namespace PVPTeam
 	void ChangeTeam(const CCommand@ pArgs)
 	{
 		CBasePlayer@ pPlayer = g_ConCommandSystem.GetCurrentPlayer();
-		if(m_bIsTDM)
+		if(m_bIsTDM && !g_SurvivalMode.IsActive())
 		{
 			PVPTeam::TeamMenu.Open(0, 0, pPlayer);
 			g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTCENTER, "Chose Your Team.\n");
 		}
 		else
 		{
-			g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTCENTER, "There's no team you fool.\n");
+			g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTCENTER, "There's no team for you fool.\n");
 		}
 	}
 }

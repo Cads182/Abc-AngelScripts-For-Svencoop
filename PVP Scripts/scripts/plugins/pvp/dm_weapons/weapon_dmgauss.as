@@ -129,6 +129,7 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 		BaseClass.Holster( skipLocal );
 		self.SendWeaponAnim( GAUSS_HOLSTER );
 		m_iInAttack = NOT_ATTACKING;
+		g_SoundSystem.StopSound( m_pPlayer.edict(), CHAN_WEAPON, "ambience/pulsemachine.wav" );
 	}
 	
 	void PrimaryAttack()

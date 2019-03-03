@@ -5,16 +5,11 @@
 #include "dm_weapons/item_dmweaponpack"
 
 bool g_HLDMDropRule = false;
-CClientCommand g_HLDMDropRuleModeVote( "votedmdrop", "starts the HLDM drop Mode vote", @DMVote4ChangeDropModeCallBack );
-
-void DMVote4ChangeDropModeCallBack( const CCommand@ pArgs )
-{
-	CDropWeaponBoxVote::StartDropModeVote();
-}
+CClientCommand g_HLDMDropRuleModeVote( "votedmdrop", "starts the HLDM drop Mode vote", @CDropWeaponBoxVote::StartDropModeVote );
 
 namespace CDropWeaponBoxVote
 {
-	void StartDropModeVote()
+	void StartDropModeVote( const CCommand@ pArgs )
 	{
 		float flVoteTime = g_EngineFuncs.CVarGetFloat( "mp_votetimecheck" );
 		

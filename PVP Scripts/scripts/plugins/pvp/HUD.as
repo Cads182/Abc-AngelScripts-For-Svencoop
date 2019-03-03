@@ -25,15 +25,12 @@ namespace PVPHUD
 			if (format_float - g_Engine.time <= 0 )
 			{
 				g_PlayerFuncs.ClientPrintAll( HUD_PRINTCENTER, "Game Started.\n");
-				g_PlayerFuncs.RespawnAllPlayers(true,true);
+				g_PlayerFuncs.RespawnAllPlayers(true, true);
 				for (int i = 1; i <= g_Engine.maxClients; i++)
 				{
 					CBasePlayer@ pPlayer = g_PlayerFuncs.FindPlayerByIndex(i);
 					if(pPlayer !is null && pPlayer.IsConnected())
-					{
-						pPlayer.pev.frags = 0;
-						pPlayer.m_iDeaths = 0;
-					}
+						ResetWeapons(pPlayer);
 				}
 				m_bIsStart = true;
 				if(m_bIsScore)
@@ -80,13 +77,13 @@ namespace PVPHUD
 						{
 							g_PlayerFuncs.ClientPrintAll( HUD_PRINTCENTER, "Team Lambda Win!\n");
 							++iEndTime;
-							g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @TakeDamage::PlayerTakeDamage);
+							g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage);
 						}
 						else if (m_iScoreTeam2 >= g_MapMaxScore)
 						{
 							g_PlayerFuncs.ClientPrintAll( HUD_PRINTCENTER, "Team H.E.C.U Win!\n");
 							++iEndTime;
-							g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @TakeDamage::PlayerTakeDamage);
+							g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage);
 						}
 						if( iEndTime >= 4 && iEndTime != 0 )
 						{
@@ -200,8 +197,12 @@ namespace PVPHUD
 	void ResetWeapons(CBasePlayer@ pPlayer)
 	{
 		pPlayer.RemoveAllItems(false);
+		pPlayer.SetItemPickupTimes(0);
 		pPlayer.GiveNamedItem("weapon_9mmhandgun" , 0 , 34 );
 		pPlayer.GiveNamedItem("weapon_crowbar" , 0 , 0 );
+		pPlayer.pev.health = 100;
+		pPlayer.pev.armorvalue = 0;
+		pPlayer.pev.frags = 0;
+		pPlayer.m_iDeaths = 0;
 	}
-
 }

@@ -174,6 +174,7 @@ class weapon_dmsnark : ScriptBasePlayerWeaponEntity
 				self.SendWeaponAnim( SQUEAK_THROW, 0, 0 );
 				CBaseEntity@ pSqueak = g_EntityFuncs.Create( "monster_snark", tr.vecEndPos, m_pPlayer.pev.v_angle, false, m_pPlayer.edict() );
 				pSqueak.pev.velocity = g_Engine.v_forward * 200 + m_pPlayer.pev.velocity;
+				pSqueak.SetClassification(m_pPlayer.Classify());
 				switch(Math.RandomLong(0,1))
 				{
 					case 0 :g_SoundSystem.EmitSoundDyn( self.edict(), CHAN_VOICE, "squeek/sqk_hunt2.wav", 1.0, ATTN_NORM, 0, 100 );break;
