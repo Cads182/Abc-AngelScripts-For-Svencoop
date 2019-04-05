@@ -25,7 +25,7 @@ class CPlayerData
 void PluginInit()
 {
 	g_Module.ScriptInfo.SetAuthor("Dr.Abc");
-	g_Module.ScriptInfo.SetContactInfo("U died little punk.");
+	g_Module.ScriptInfo.SetContactInfo("https://github.com/DrAbcrealone");
 	
 	g_CommandList.deleteAll();
 	g_PlayerData.deleteAll();
