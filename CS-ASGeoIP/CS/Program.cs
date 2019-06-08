@@ -85,7 +85,8 @@ namespace TxTGeoIP
                     string op = "";
                     for (int i = 0; i < cache.Length; i++)
                     {
-                        op = op + cache[i] + "\n";
+                        if(!string.IsNullOrEmpty(cache[i]))
+                            op = op + cache[i] + "\n";
                     }
                     if (!IsExs)
                         op = op + ID + "," + FormatIpBack(output);
@@ -107,20 +108,28 @@ namespace TxTGeoIP
             //规范格式
             string FormatIpBack(in string Input)
             {
-                string[] cache = Input.Replace("{", "").Replace("}", "").Replace('"', ' ').Replace(" ","").Split(',');
-                string[] Output = new string[4];
-                for(int i =0;i<cache.Length;i++)
+                try
                 {
-                    if (cache[i].IndexOf("countryCode") != -1)
-                        Output[0] = cache[i].Replace("countryCode:", "");
-                    else if (cache[i].IndexOf("country") != -1)
-                        Output[1] = cache[i].Replace("country:", "");
-                    else if (cache[i].IndexOf("regionName") != -1)
-                        Output[2] = cache[i].Replace("regionName:", "");
-                    else if (cache[i].IndexOf("city") != -1)
-                       Output[3] = cache[i].Replace("city:", "");
+                    string[] cache = Input.Replace("{", "").Replace("}", "").Replace('"', ' ').Replace(" ", "").Split(',');
+                    string[] Output = new string[4];
+                    for (int i = 0; i < cache.Length; i++)
+                    {
+                        if (cache[i].IndexOf("countryCode") != -1)
+                            Output[0] = cache[i].Replace("countryCode:", "");
+                        else if (cache[i].IndexOf("country") != -1)
+                            Output[1] = cache[i].Replace("country:", "");
+                        else if (cache[i].IndexOf("regionName") != -1)
+                            Output[2] = cache[i].Replace("regionName:", "");
+                        else if (cache[i].IndexOf("city") != -1)
+                            Output[3] = cache[i].Replace("city:", "");
+                    }
+                    return Output[0] + "," + Output[1] + "," + Output[2] + "," + Output[3];
                 }
-                return Output[0] + "," + Output[1] + "," + Output[2] + "," + Output[3];
+                catch(Exception e)
+                {
+                    Dialog("[[[错误]]]:" + e.Message);
+                }
+                return "";
             }
 
             //读
@@ -139,9 +148,9 @@ namespace TxTGeoIP
                         //去分隔符
                         return line;
                     }
-                    catch
+                    catch(Exception e)
                     {
-                        Dialog("被占用发送失败咯");
+                        Dialog("被占用发送失败咯:" + e.Message);
                         return null;
                     }
 
@@ -158,19 +167,45 @@ namespace TxTGeoIP
                 }
                 //发送地址
                 string url = "http://ip-api.com/json/" + ipAdd  + "?lang=zh-CN";
+                string str = "";
                 WebRequest wRequest = WebRequest.Create(url);
                 wRequest.Method = "GET";
                 wRequest.ContentType = "text/html;charset=UTF-8";
-                WebResponse wResponse = wRequest.GetResponse();
-                Stream stream = wResponse.GetResponseStream();
-                //防中文乱码
-                StreamReader reader = new StreamReader(stream, Encoding.GetEncoding("utf-8"));
-                //url返回的值  
-                string str = reader.ReadToEnd();   
-                //关闭流
-                reader.Close();
-                wResponse.Close();
-                Dialog("成功！获取了地址！");
+                wRequest.Timeout = 50000; //设置超时时间
+                WebResponse wResponse = null;
+                try
+                {
+                    wResponse = wRequest.GetResponse();
+                }
+                catch (WebException e)
+                {
+                    //发生网络错误时,获取错误响应信息
+                    Dialog("发生网络错误！ " + e.Message + ". 请稍后再试");
+                }
+                catch (Exception e)
+                {
+                    //发生异常时把错误信息当作错误信息返回
+                    Dialog("发生错误：" + e.Message);
+
+                }
+                finally
+                {
+                    if (wResponse != null)
+                    {
+                        //获得网络响应流
+                        Stream stream = wResponse.GetResponseStream();
+                        //防中文乱码
+                        StreamReader reader = new StreamReader(stream, Encoding.GetEncoding("utf-8"));
+                        //url返回的值  
+                        str = reader.ReadToEnd();
+                        //关闭流
+                        reader.Close();
+                        wResponse.Close();
+                        Dialog("成功！获取了地址！");
+                    }
+                   else
+                        Dialog("响应为空！");
+                }
                 return str;
             }
             //占用判断防止报错
