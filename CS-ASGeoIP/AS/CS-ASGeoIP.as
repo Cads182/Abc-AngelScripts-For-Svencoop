@@ -7,6 +7,7 @@ namespace CIPAdderss
 	const string JoinTitle = "Geo-IP";
 	const string FileDir	= "scripts/plugins/store/IPOutput.txt";
 	const string FileOut	= "scripts/plugins/store/IPInput.txt";
+	string ThatDay;
 	dictionary GeoIPDataBase;
 
 	string LeaveCast(CBasePlayer@ pPlayer)
@@ -156,6 +157,7 @@ class CCIPData
 	}
 }
 
+
 void PluginInit()
 {
 	g_Module.ScriptInfo.SetAuthor("Dr.Abc");
@@ -168,12 +170,23 @@ void PluginInit()
 	data.City = "未知";
 	CIPAdderss::GeoIPDataBase["Unkown"] = data;
 
-	CIPAdderss::WriteMetaIP("",CIPAdderss::FileDir);
-
 	//注册Time
 	g_Hooks.RegisterHook( Hooks::Player::ClientConnected, @ClientConnected );
 	g_Hooks.RegisterHook( Hooks::Player::ClientDisconnect, @ClientDisconnect );
 	g_Hooks.RegisterHook( Hooks::Player::ClientPutInServer, @ClientPutInServer );
+}
+
+void MapInit()
+{
+	string Date;
+	DateTime time;
+	time.Format(Date, "%d" );
+
+	if( Date != CIPAdderss::ThatDay )
+	{
+		CIPAdderss::WriteMetaIP("",CIPAdderss::FileDir);
+		CIPAdderss::ThatDay = Date;
+	}
 }
 
 HookReturnCode ClientConnected( edict_t@ pEntity, const string& in szPlayerName, const string& in szIPAddress, bool& out bDisallowJoin, string& out szRejectReason )
