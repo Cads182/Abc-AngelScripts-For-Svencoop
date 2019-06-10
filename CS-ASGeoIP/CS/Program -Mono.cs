@@ -205,6 +205,7 @@ namespace TxTGeoIP
         }
 
         //占用判断防止报错
+        //Linux没有Kernel32只能试着去读
         public static bool IsFileInUse(string fileName)
         {
             bool inUse = true;
@@ -223,16 +224,14 @@ namespace TxTGeoIP
                 finally
                 {
                     if (fs != null)
-                    {
                         fs.Close();
-                    }
                 }
                 return inUse;           //true表示正在使用,false没有使用
             }
             else
             {
                 Dialog("文件"+ fileName + "不存在！");
-                return false;           //文件不存在则一定没有被使用
+                return false;           //文件不存在
             }
         }
     }
