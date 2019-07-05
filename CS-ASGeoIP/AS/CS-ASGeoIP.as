@@ -184,6 +184,7 @@ void MapInit()
 
 	if( Date != CIPAdderss::ThatDay )
 	{
+		CIPAdderss::GeoIPDataBase.deleteAll();
 		CIPAdderss::WriteMetaIP("",CIPAdderss::FileDir);
 		CIPAdderss::ThatDay = Date;
 	}
@@ -192,14 +193,16 @@ void MapInit()
 HookReturnCode ClientConnected( edict_t@ pEntity, const string& in szPlayerName, const string& in szIPAddress, bool& out bDisallowJoin, string& out szRejectReason )
 {
 	const string szSteamId = g_EngineFuncs.GetPlayerAuthId(pEntity);
-	CIPAdderss::WriteMetaIP(szSteamId + "," +szIPAddress);
+	if(!CIPAdderss::GeoIPDataBase.exists(szSteamId))
+		CIPAdderss::WriteMetaIP(szSteamId + "," +szIPAddress);
 	return HOOK_HANDLED;
 }
 
 HookReturnCode ClientPutInServer(CBasePlayer@ pPlayer)
 {
-	CIPAdderss::ReadIP();
 	const string szSteamId = g_EngineFuncs.GetPlayerAuthId(pPlayer.edict());
+	if(!CIPAdderss::GeoIPDataBase.exists(szSteamId))
+		CIPAdderss::ReadIP();
 	CIPAdderss::BroadIPAddress(pPlayer.pev.netname, szSteamId );
 	return HOOK_HANDLED;
 }
