@@ -2,7 +2,7 @@
 	Made by Dr.Abc
 ***/
 
-CClientCommand g_DMRuleModeVote( "votedmrule", "starts the DM rule Mode vote", @CVoteDMRule::DMRuleVoteCallback );
+
 
 namespace CVoteDMRule
 {

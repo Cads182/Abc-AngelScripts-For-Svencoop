@@ -5,7 +5,7 @@
 #include "dm_weapons/item_dmweaponpack"
 
 bool g_HLDMDropRule = false;
-CClientCommand g_HLDMDropRuleModeVote( "votedmdrop", "starts the HLDM drop Mode vote", @CDropWeaponBoxVote::StartDropModeVote );
+
 
 namespace CDropWeaponBoxVote
 {
@@ -47,6 +47,10 @@ namespace CDropWeaponBoxVote
 
 class CDropWeaponBox
 {
+	bool IsDrop()
+	{
+		return g_HLDMDropRule;
+	}
 	void DropIt( CBasePlayer@ pPlayer )
 	{
 		if(!g_HLDMDropRule)
@@ -60,33 +64,36 @@ class CDropWeaponBox
 		
 		CBasePlayerWeapon@ pWeapon = cast<CBasePlayerWeapon@>(pPlayer.m_hActiveItem.GetEntity());
 		@pPack.pWeapon = pWeapon;
-		if( pWeapon.PrimaryAmmoIndex() != -1 )
-		{
-			pPack.m_iAmmo1 = pPlayer.m_rgAmmo( pWeapon.PrimaryAmmoIndex());
-			pPlayer.m_rgAmmo(pWeapon.PrimaryAmmoIndex(), 0);
-		}
-		if( pWeapon.SecondaryAmmoIndex() != -1 )
-		{
-			pPack.m_iAmmo2 = pPlayer.m_rgAmmo( pWeapon.SecondaryAmmoIndex());
-			pPlayer.m_rgAmmo(pWeapon.SecondaryAmmoIndex(), 0);
-		}
+		
 		if( pWeapon !is null )
+		{
+			if( pWeapon.PrimaryAmmoIndex() != -1 )
+			{
+				pPack.m_iAmmo1 = pPlayer.m_rgAmmo( pWeapon.PrimaryAmmoIndex());
+				pPlayer.m_rgAmmo(pWeapon.PrimaryAmmoIndex(), 0);
+			}
+			if( pWeapon.SecondaryAmmoIndex() != -1 )
+			{
+				pPack.m_iAmmo2 = pPlayer.m_rgAmmo( pWeapon.SecondaryAmmoIndex());
+				pPlayer.m_rgAmmo(pWeapon.SecondaryAmmoIndex(), 0);
+			}
 			pPack.m_strpWeapon = string( pWeapon.pev.classname );
-		CBasePlayerItem@ pItem = cast<CBasePlayerItem@>(pWeapon);
-		pPlayer.RemovePlayerItem(pItem);
+			CBasePlayerItem@ pItem = cast<CBasePlayerItem@>(pWeapon);
+			pPlayer.RemovePlayerItem(pItem);
+		}
 	}
 	
 	void ApplyDropRule()
 	{
 		if(g_HLDMDropRule)
 		{
-			g_EngineFuncs.CVarSetFloat( "mp_weapon_droprules", 0 );
-			g_EngineFuncs.CVarSetFloat( "mp_ammo_droprules", 0 );
+			g_DMUtility.CServerCommand( "mp_weapon_droprules", 0 );
+			g_DMUtility.CServerCommand( "mp_ammo_droprules", 0 );
 		}
 		else
 		{
-			g_EngineFuncs.CVarSetFloat( "mp_weapon_droprules", 2 );
-			g_EngineFuncs.CVarSetFloat( "mp_ammo_droprules", 2 );
+			g_DMUtility.CServerCommand( "mp_weapon_droprules", 2 );
+			g_DMUtility.CServerCommand( "mp_ammo_droprules", 2 );
 		}
 	}
 	

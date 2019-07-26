@@ -27,7 +27,6 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 	private float flPlrGauss = g_EngineFuncs.CVarGetFloat( "sk_plr_gauss" );
 	private bool m_bPrimaryFire;
 	private bool g_brunninggausspred;
-	private bool bIsMultiplayer = true;
 	private int AMMO_PER_PRIMARY_SHOT = 2;
 	private float m_flStartCharge, m_flAmmoStartCharge, m_flNextAmmoBurn;
 	private uint8 m_iInAttack;
@@ -50,7 +49,7 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 	
 	float GetFullChargeTime()
 	{
-		if ( bIsMultiplayer )
+		if ( g_pGameRules.IsMultiplayer )
 		{
 			return 1.5;
 		}
@@ -234,7 +233,7 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 			if( WeaponTimeBase() >= m_flNextAmmoBurn && m_flNextAmmoBurn != 1000 )
 			{
 				m_pPlayer.m_rgAmmo( self.m_iPrimaryAmmoType, m_pPlayer.m_rgAmmo( self.m_iPrimaryAmmoType ) - 1 );
-				if ( bIsMultiplayer )
+				if ( g_pGameRules.IsMultiplayer )
 					m_flNextAmmoBurn = WeaponTimeBase() + 0.1;
 				else
 					m_flNextAmmoBurn = WeaponTimeBase() + 0.3;
@@ -301,7 +300,7 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 			float flZVel = m_pPlayer.pev.velocity.z;
 			if ( !m_bPrimaryFire )
 			{
-				if ( !bIsMultiplayer )
+				if ( !g_pGameRules.IsMultiplayer )
 				{
 					// in deathmatch, gauss can pop you up into the air. Not in single play.
 					Vector vecVelocity = m_pPlayer.pev.velocity;
@@ -451,7 +450,7 @@ class weapon_dmgauss : ScriptBasePlayerWeaponEntity
 								float damage_radius;
 								
 
-								if ( bIsMultiplayer )
+								if ( g_pGameRules.IsMultiplayer )
 								{
 									damage_radius = flDamage * 1.75;  // Old code == 2.5
 								}
@@ -640,4 +639,5 @@ void RegisterDMGauss()
 {
 	g_CustomEntityFuncs.RegisterCustomEntity( "weapon_dmgauss", GetDMGaussName() );
 	g_ItemRegistry.RegisterWeapon( GetDMGaussName(), "dm_weapons", "uranium" );
+	g_DMEntityList.insertLast(GetDMGaussName());
 }

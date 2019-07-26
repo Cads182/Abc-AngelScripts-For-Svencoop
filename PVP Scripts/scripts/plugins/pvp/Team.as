@@ -1,6 +1,14 @@
 /***
 	Made by Dr.Abc
 ***/
+class CPVPTeam
+{
+	void TeamPluginInt()
+	{
+		PVPTeam::TeamPluginInt();
+	}
+}
+CPVPTeam g_PVPTeam;
 
 namespace PVPTeam
 {
@@ -13,13 +21,6 @@ namespace PVPTeam
 		TeamMenu.AddItem("Team Lambda", null);
 		TeamMenu.AddItem("Team HECU", null);
 		TeamMenu.SetTitle("[" + MenuTitle + "]\n");
-	}
-	
-	void CCommandApplyer(CBasePlayer@ pPlayer, const string Arg)
-	{
-		NetworkMessage m(MSG_ONE, NetworkMessages::SVC_STUFFTEXT, pPlayer.edict());
-			m.WriteString(Arg);
-		m.End();
 	}
 
 	void TeamMenuRespond(CTextMenu@ mMenu, CBasePlayer@ pPlayer, int iPage, const CTextMenuItem@ mItem)
@@ -67,7 +68,7 @@ namespace PVPTeam
 		g_EntityFuncs.DispatchKeyValue(pPlayer.edict(), "classify", 5 );
 		pPlayer.pev.targetname = "team1";
 		++m_iTeam1;
-		PVPHUD::ResetWeapons(pPlayer);
+		g_DMUtility.ResetWeapons(pPlayer);
 		string StrpModel;
 		switch (Math.RandomLong(0,7))
 		{
@@ -80,9 +81,9 @@ namespace PVPTeam
 			case 6 :StrpModel = "hevscientist3";break;
 			case 7 :StrpModel = "hevbarney";break;
 		}
-		CCommandApplyer(pPlayer,"setinfo model " + StrpModel);
+		g_DMUtility.CCommandApplyer(pPlayer,"setinfo model " + StrpModel);
 		g_PlayerFuncs.RespawnPlayer(pPlayer,true,true);
-		g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTTALK, "You joined the Team Lambda.\n");
+		g_DMUtility.SayToYou(pPlayer,  "You joined the Team Lambda.");
 	}
 
 	void AddToTeam2(CBasePlayer@ pPlayer)
@@ -99,7 +100,7 @@ namespace PVPTeam
 		g_EntityFuncs.DispatchKeyValue(pPlayer.edict(), "classify", 6 );
 		pPlayer.pev.targetname = "team2";
 		++m_iTeam2;
-		PVPHUD::ResetWeapons(pPlayer);
+		g_DMUtility.ResetWeapons(pPlayer);
 		string StrpModel;
 		switch (Math.RandomLong(0,7))
 		{
@@ -112,9 +113,9 @@ namespace PVPTeam
 			case 6 :StrpModel = "OP4_Grunt";break;
 			case 7 :StrpModel = "OP4_Shephard";break;
 		}
-		CCommandApplyer(pPlayer,"setinfo model " + StrpModel);
+		g_DMUtility.CCommandApplyer(pPlayer,"setinfo model " + StrpModel);
 		g_PlayerFuncs.RespawnPlayer(pPlayer,true,true);
-		g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTTALK, "You joined the Team H.E.C.U.\n");
+		g_DMUtility.SayToYou(pPlayer,  "You joined the Team H.E.C.U.");
 	}
 	
 	void ChangeTeam(const CCommand@ pArgs)
@@ -129,5 +130,20 @@ namespace PVPTeam
 		{
 			g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTCENTER, "There's no team for you fool.\n");
 		}
+	}
+	
+	void DisconectHook( CBasePlayer@ pPlayer )
+	{
+		if(pPlayer.pev.targetname == "team1")
+			--m_iTeam1;
+		if(pPlayer.pev.targetname == "team2")
+			--m_iTeam2;
+	}
+	
+	void PutInServerHook( CBasePlayer@ pPlayer )
+	{
+		pPlayer.pev.targetname = "normalplayer";
+		pPlayer.pev.solid	   = SOLID_BBOX;
+		g_EntityFuncs.DispatchKeyValue(pPlayer.edict(), "classify", 0 );
 	}
 }

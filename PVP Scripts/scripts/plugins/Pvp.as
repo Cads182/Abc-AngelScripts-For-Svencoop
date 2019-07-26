@@ -10,12 +10,17 @@
 #include "pvp/Hooks"
 #include "pvp/TakeDamage"
 #include "pvp/ReadFiles"
+#include "pvp/Utility"
+#include "pvp/CommandBench"
+#include "pvp/Hitbox"
+
 //Addition
 #include "pvp/ClassMode"
 #include "pvp/DropBox"
 #include "pvp/VoteRule"
 #include "pvp/Arcade"
 #include "pvp/LMS"
+#include "pvp/ZM"
 
 //Setting
 const float g_WaitingTime = 30;						//TDM Waiting Time
@@ -35,24 +40,41 @@ void PluginInit()
 {
 	g_Module.ScriptInfo.SetAuthor("Dr.Abc");
 	g_Module.ScriptInfo.SetContactInfo("https://forums.svencoop.com/showthread.php/46283-Plugin-PVP-Enable");
-	g_ReadFiles.deleteAll();
-	g_ReadFiles.ReadMaps();
-	g_ReadFiles.ReadSkills();
-	PVPTeam::TeamPluginInt();
+	g_ReadFiles.PluginInit();
+	//Put ur call below
+	g_PVPTeam.TeamPluginInt();
+	g_DMCommandBench.CommandPluginInit();
 }
 
 void MapInit()
 {
-	g_ReadFiles.Resetvariable();
-	g_ReadFiles.IsPVP();
+	g_ReadFiles.Resetvariable();//HACK HACK: keep this one as first, or you will mess up the timelist.
+	g_ReadFiles.IsPVP();//HACK HACK: keep this one as seccond, or you will keep the script off.
+	
+	if(!m_bIsPVP)
+	{
+		//g_DMUtility.EntityUnregister();//Useless
+		return;
+	}
+		
+	g_SurvivalMode.EnableMapSupport();
+
+	g_HitBox.MapInit();
+	
+	//Put ur call below
 	g_DMDropRule.ApplyDropRule();
 	g_DMClassMode.EnableClassMode( IsClassMode );
-	g_SurvivalMode.EnableMapSupport();
 	g_LMSMode.LMSModeInitialized();
+	g_Arcade.ArcadeModeInitialized();
+	g_SvenZM.ZMMapInit();
 }
 
 void MapActivate()
 {
-	if( g_ReadFiles.IsPVP() )
-		g_DMClassMode.WeaponReplace();
+	if(!m_bIsPVP)
+		return;
+	
+	//Put ur call below
+	g_DMClassMode.WeaponReplace();
+	g_SvenZM.ZMItemRemover();
 }

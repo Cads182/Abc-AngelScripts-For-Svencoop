@@ -153,8 +153,8 @@ class dmhornet : ScriptBaseMonsterEntity
 		}
 		while ( ent !is null );
 		
-		if ( enemy !is null )	
-			g_Game.AlertMessage( at_console, "new enemy %1, relationship %2\n", enemy.GetClassname(), self.IRelationship(enemy) );
+		//if ( enemy !is null )	
+			//g_Game.AlertMessage( at_console, "new enemy %1, relationship %2\n", enemy.GetClassname(), self.IRelationship(enemy) );
 
 		return enemy;
 	}
@@ -356,4 +356,5 @@ class dmhornet : ScriptBaseMonsterEntity
 void RegisterDMhornet()
 {
 	g_CustomEntityFuncs.RegisterCustomEntity( "dmhornet", "dmhornet" );
+	g_DMEntityList.insertLast("dmhornet");
 }

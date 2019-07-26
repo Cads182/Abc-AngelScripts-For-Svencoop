@@ -30,7 +30,7 @@ namespace PVPHUD
 				{
 					CBasePlayer@ pPlayer = g_PlayerFuncs.FindPlayerByIndex(i);
 					if(pPlayer !is null && pPlayer.IsConnected())
-						ResetWeapons(pPlayer);
+						g_DMUtility.ResetWeapons(pPlayer);
 				}
 				m_bIsStart = true;
 				if(m_bIsScore)
@@ -50,7 +50,7 @@ namespace PVPHUD
 					{
 						pPlayer.pev.health = 0;
 						pPlayer.pev.armorvalue = 0;
-						pPlayer.pev.deadflag = DEAD_DYING;
+						pPlayer.pev.deadflag = DEAD_RESPAWNABLE;
 					}
 					if (!m_bIsScore) 
 					{
@@ -93,7 +93,7 @@ namespace PVPHUD
 					}
 					if(m_bIsTDM)
 					{
-						if( pPlayer.pev.targetname == "normalplayer" && pPlayer.IsAlive() )
+						if( pPlayer.pev.targetname == "normalplayer"  && pPlayer.IsAlive() )
 						{
 							g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTCENTER, "Chose Your Team.\n");	
 							PVPTeam::TeamMenu.Open(0, 0, pPlayer);
@@ -104,13 +104,13 @@ namespace PVPHUD
 							{
 								PVPTeam::AddToTeam2(pPlayer);
 								g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTCENTER, "You have been move to team 2 for balance.\n");
-								g_PlayerFuncs.ClientPrintAll( HUD_PRINTTALK, string(pPlayer.pev.netname) + " have been move to team 2 for balance.\n");
+								g_DMUtility.SayToAll(  string(pPlayer.pev.netname) + " have been move to team 2 for balance.");
 							}
 							else if(pPlayer.pev.targetname == "team2")
 							{
 								PVPTeam::AddToTeam1(pPlayer);
 								g_PlayerFuncs.ClientPrint(pPlayer, HUD_PRINTCENTER, "You have been move to team 1 for balance.\n");
-								g_PlayerFuncs.ClientPrintAll( HUD_PRINTTALK, string(pPlayer.pev.netname) + " have been move to team 1 for balance.\n");
+								g_DMUtility.SayToAll(  string(pPlayer.pev.netname) + " have been move to team 1 for balance.");
 							}
 						}
 					}
@@ -155,9 +155,7 @@ namespace PVPHUD
 		{
 			CBasePlayer@ pPlayer = g_PlayerFuncs.FindPlayerByIndex(i);
 			if(pPlayer !is null && pPlayer.IsConnected())
-			{
 				SendScore( pPlayer );
-			}
 		}
 	}
 
@@ -169,16 +167,10 @@ namespace PVPHUD
 		{
 			m_bIsWarining = true;
 			++WarnTime;
-			if( g_Engine.maxClients != 0 )
-			{
-				CBasePlayer@ tPlayer = g_PlayerFuncs.FindPlayerByIndex(1);
-				g_SoundSystem.EmitSound( tPlayer.edict(), CHAN_AUTO, "vox/warning.wav", 1.0, ATTN_NONE );
-			}
+			g_SoundSystem.EmitSound( g_EntityFuncs.Instance(0).edict(), CHAN_MUSIC, "vox/warning.wav", 1.0, ATTN_NONE );
 		}
 		if(g_TiemLeft + g_WaitingTime - g_Engine.time <= 0)
-		{
 			EndGame();
-		}	
 			
 		params.channel = HUD_CHAN_PVP;
 		params.flags = HUD_ELEM_DEFAULT_ALPHA | HUD_TIME_MINUTES | HUD_TIME_SECONDS | HUD_ELEM_SCR_CENTER_X | HUD_TIME_COUNT_DOWN;
@@ -191,18 +183,8 @@ namespace PVPHUD
 		params.value = g_TiemLeft + g_WaitingTime - g_Engine.time;
 		params.color1 = m_bIsWarining ? RGBA_RED : RGBA_SVENCOOP;
 		params.spritename = "stopwatch";
-		g_PlayerFuncs.HudTimeDisplay( pPlayer, params );
-	}
-
-	void ResetWeapons(CBasePlayer@ pPlayer)
-	{
-		pPlayer.RemoveAllItems(false);
-		pPlayer.SetItemPickupTimes(0);
-		pPlayer.GiveNamedItem("weapon_9mmhandgun" , 0 , 34 );
-		pPlayer.GiveNamedItem("weapon_crowbar" , 0 , 0 );
-		pPlayer.pev.health = 100;
-		pPlayer.pev.armorvalue = 0;
-		pPlayer.pev.frags = 0;
-		pPlayer.m_iDeaths = 0;
+		
+		if(m_bSendTime)
+			g_PlayerFuncs.HudTimeDisplay( pPlayer, params );
 	}
 }

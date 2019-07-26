@@ -5,7 +5,7 @@
 int g_TiemLeft,m_iTeam1,m_iTeam2,flDamage,m_iScoreTeam1,m_iScoreTeam2,g_MapMaxScore;
 float format_float;
 uint8 uint_PlayerTeam = 3,iEndTime,WarnTime;
-bool m_bIsTDM,m_bIsStart,m_bIsScore,m_bIsWarining;
+bool m_bIsTDM,m_bIsStart,m_bIsScore,m_bIsWarining,m_bSendTime,m_bIsPVP;
 
 class CMapData{ int8 MapMode; int MapTime; }
 class CSkilldata{ string SkillName; float SkillValue; }
@@ -70,24 +70,26 @@ class CReadFiles
 		for (uint i = 0; i < g_SklListVals.length(); ++i) 
 		{
 			const CSkilldata@ data = cast<CSkilldata@>(g_SklListVals[i]);
-			g_EngineFuncs.CVarSetFloat( data.SkillName, data.SkillValue );
+			g_DMUtility.CServerCommand( data.SkillName, data.SkillValue );
 		}
 	}
 	
 	void Resetvariable()
 	{
 		format_float = g_WaitingTime;
-		m_bIsTDM = m_bIsStart = m_bIsScore = m_bIsWarining = false;
+		m_bIsTDM = m_bIsStart = m_bIsScore = m_bIsWarining = m_bIsPVP = false;
+		m_bSendTime = true;
 		m_iTeam1 = m_iTeam2 = m_iScoreTeam1 = m_iScoreTeam2 = 0;
 		iEndTime = WarnTime = 0;
 		uint_PlayerTeam = 3;
 		g_Scheduler.ClearTimerList();
+		g_Hooks.RemoveHook(Hooks::Player::ClientConnected, @ClientConnected);
 		g_Hooks.RemoveHook(Hooks::Player::ClientPutInServer, @ClientPutInServer);
+		g_Hooks.RemoveHook(Hooks::Player::ClientSay, @ClientSay);
 		g_Hooks.RemoveHook(Hooks::Player::ClientDisconnect, @ClientDisconnect);
 		g_Hooks.RemoveHook(Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage);
 		g_Hooks.RemoveHook(Hooks::Player::PlayerSpawn, @PlayerSpawn);
-		g_CustomEntityFuncs.UnRegisterCustomEntity( "info_ctfspawn" );
-		g_CustomEntityFuncs.UnRegisterCustomEntity( "item_dmweaponpack" );
+		g_Hooks.RemoveHook(Hooks::Player::ClientSay, @ClientSay);
 	}
 	
 	void deleteAll()
@@ -96,16 +98,26 @@ class CReadFiles
 		g_SklListVals = {};
 	}
 	
+	void PluginInit()
+	{
+		deleteAll();
+		ReadMaps();
+		ReadSkills();
+	}
+	
 	bool IsPVP()
 	{
 		string szMapName = string(g_Engine.mapname).ToLowercase();
 		if(g_PVPMapList.exists(szMapName))
 		{
+			g_Hooks.RegisterHook(Hooks::Player::ClientConnected, @ClientConnected);
 			g_Hooks.RegisterHook(Hooks::Player::ClientPutInServer, @ClientPutInServer);
 			g_Hooks.RegisterHook(Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage);
 			g_Hooks.RegisterHook(Hooks::Player::PlayerSpawn, @PlayerSpawn);
 			g_CustomEntityFuncs.RegisterCustomEntity( "info_ctfspawn", "info_ctfspawn" );
 			g_CustomEntityFuncs.RegisterCustomEntity( "item_dmweaponpack", "item_dmweaponpack" );
+			g_DMEntityList.insertLast("info_ctfspawn");
+			g_DMEntityList.insertLast("item_dmweaponpack");
 			
 			@HUDStart = g_Scheduler.SetInterval( "RefreshHUD", 1, g_Scheduler.REPEAT_INFINITE_TIMES );
 			
@@ -116,6 +128,7 @@ class CReadFiles
 			
 			m_bIsTDM = IsTDM();
 			m_bIsScore = IsScore();
+			m_bIsPVP = true;
 			return true;
 		}
 		return false;
@@ -125,7 +138,7 @@ class CReadFiles
 	{
 		string szMapName = string(g_Engine.mapname).ToLowercase();
 		const CMapData@ data = cast<CMapData@>(g_PVPMapList[szMapName]);
-		if ( data.MapMode == 1 || data.MapMode == 2 ) 
+		if ( data !is null && (data.MapMode == 1 || data.MapMode == 2) ) 
 		{
 			g_Hooks.RegisterHook(Hooks::Player::ClientDisconnect, @ClientDisconnect);
 			return true;
@@ -137,11 +150,17 @@ class CReadFiles
 	{
 		string szMapName = string(g_Engine.mapname).ToLowercase();
 		const CMapData@ data = cast<CMapData@>(g_PVPMapList[szMapName]);
-		if (data.MapMode == 2 ) 
+		
+		if(data is null)
+			return false;
+			
+		if ( data.MapMode == 2 ) 
 		{
 			g_MapMaxScore = data.MapTime == 0 ? g_MaxScore : data.MapTime;
 			g_Game.PrecacheModel("sprites/misc/hecu.spr");
+			g_Game.PrecacheGeneric("sprites/misc/hecu.spr");
 			g_Game.PrecacheModel("sprites/misc/lambda.spr");
+			g_Game.PrecacheGeneric("sprites/misc/lambda.spr");
 			g_SoundSystem.PrecacheSound("vox/victor.wav");
 			return true;
 		}

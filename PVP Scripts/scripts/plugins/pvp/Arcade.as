@@ -2,11 +2,25 @@
 	Made by Dr.Abc
 ***/
 
-CClientCommand g_ArcadeModeVote( "votedmarcade", "starts the arcade Mode vote", @CVoteArcade::DMArcadeVoteCallback );
+
+
 namespace CVoteArcade
 {
 	const float m_fArcadeVoteTime  = 60.0f;	
 	bool g_IsArcade = false;
+	
+	bool CanWeArcade()
+	{
+		string szMapName = string(g_Engine.mapname).ToLowercase();
+		const CMapData@ data = cast<CMapData@>(g_ReadFiles.g_PVPMapList[szMapName]);
+		if ( data is null || data.MapMode == 3 )
+		{
+			g_IsArcade = false;
+			return false;
+		}
+		else
+			return true;
+	}
 	
 	array<string> giveAllList = {
 		"weapon_crowbar",
@@ -79,6 +93,7 @@ namespace CVoteArcade
 	
 	void StartArcadeVote()
 	{
+		
 		float flVoteTime = g_EngineFuncs.CVarGetFloat( "mp_votetimecheck" );
 		
 		if( flVoteTime <= 0 )
@@ -128,7 +143,9 @@ namespace CVoteArcade
 	{
 		CBasePlayer@ pPlayer = g_ConCommandSystem.GetCurrentPlayer();
 		if (g_Engine.time >= m_fArcadeVoteTime)
-			g_PlayerFuncs.SayText( pPlayer, "Game has been started for a while"+"(>"+m_fArcadeVoteTime+"s)" +", you can't change rule any more!" );
+			g_DMUtility.SayToYou( pPlayer, "Game has been started for a while"+"(>"+m_fArcadeVoteTime+"s)" +", you can't change rule any more!" );
+		else if(!CanWeArcade())
+			g_DMUtility.SayToYou( pPlayer, "You can't arcade in this map!" );
 		else
 			StartArcadeVote();
 	}
@@ -136,12 +153,16 @@ namespace CVoteArcade
 	void ApplyArcade( CBasePlayer@ pPlayer )
 	{
 		CBasePlayerWeapon@ pWeapon = cast<CBasePlayerWeapon@>(pPlayer.m_hActiveItem.GetEntity());
-		if(pWeapon.m_iClip != -1)
-			pWeapon.m_iClip = pWeapon.iMaxClip();
-		
 		string m_stractiveItem;
-		if (pPlayer.m_hActiveItem.GetEntity() !is null)
-			m_stractiveItem = pWeapon.pev.classname;
+		
+		if(pWeapon !is null)
+		{
+			if(pWeapon.m_iClip != -1)
+				pWeapon.m_iClip = pWeapon.iMaxClip();
+			
+			if (pPlayer.m_hActiveItem.GetEntity() !is null)
+				m_stractiveItem = pWeapon.pev.classname;
+		}
 		
 		pPlayer.SetItemPickupTimes(0);
 	
@@ -168,3 +189,19 @@ namespace CVoteArcade
 		pPlayer.pev.armorvalue = 100;
 	}
 }
+
+class CCArcade
+{
+	void ArcadeModeInitialized()
+	{
+		CVoteArcade::CanWeArcade();
+	}
+	
+	void ArcadeRespwan( CBasePlayer@ pPlayer )
+	{
+		if(CVoteArcade::g_IsArcade)
+			CVoteArcade::ApplyArcade(pPlayer);
+	}
+}
+
+CCArcade g_Arcade;

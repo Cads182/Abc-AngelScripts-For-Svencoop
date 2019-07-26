@@ -303,4 +303,5 @@ void RegisterDMHornetGun()
 	RegisterDMhornet();
 	g_CustomEntityFuncs.RegisterCustomEntity( "weapon_dmhornetgun", GetNameDMHornet() );
 	g_ItemRegistry.RegisterWeapon( GetNameDMHornet(), "dm_weapons", "Hornet" );
+	g_DMEntityList.insertLast("weapon_dmhornetgun");
 }
