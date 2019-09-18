@@ -1,13 +1,16 @@
+//test
 string test = "";
 string strMatrix = "  ";
 float flObj = 0;
 CClientCommand g_HelloWorld("hello", "Hello", @helloword);
 void helloword(const CCommand@ pArgs) 
 {
-	g_Game.AlertMessage( at_console, "Your Substr is: [" + test + "].\n");
+    g_Game.AlertMessage( at_console, "Your Substr is: [" + test + "].\n");
     g_Game.AlertMessage( at_console, "Your Result is: [" + flObj + "].\n");
     g_Game.AlertMessage( at_console, "Your Matrix is: \n" + strMatrix );
 }
+//test//
+
 
 const double m_iLcsMarch = 0.65;
 string LastMap = "";
@@ -43,6 +46,7 @@ bool LCS( string&in str1, string&in str2)
         strMatrix += string(str2.opIndex(i)) + " ";
     }
     strMatrix += "\n";
+    //test//
 
     for (uint i = 0; i < str1.Length(); i++)
     {
@@ -54,11 +58,13 @@ bool LCS( string&in str1, string&in str2)
         strMatrix += "\n";
     }
     
-    float Result = float(length)/float(str2.Length());
+
+    float Result = float(length)/float( str2.Length() > str1.Length() ? str2.Length() : str1.Length() );
 
     //test
     flObj = Result;
-
+    //test//
+    
     if( Result >= m_iLcsMarch)
         return true;
     return false;
