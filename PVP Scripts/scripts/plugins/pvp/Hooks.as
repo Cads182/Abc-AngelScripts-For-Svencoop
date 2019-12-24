@@ -12,7 +12,7 @@ HookReturnCode ClientPutInServer(CBasePlayer@ pPlayer)
 {
 	PVPTeam::PutInServerHook(pPlayer);
 	g_DMUtility.CCommandApplyer(pPlayer,"cl_updaterate 102;cl_cmdrate 300;cl_cmdbackup 1;");
-	g_EntityFuncs.SetSize(pPlayer.pev, g_vecZero, g_vecZero);
+	//g_EntityFuncs.SetSize(pPlayer.pev, g_vecZero, g_vecZero);
 		
 	if( CSvenZM::IsZM() || CSvenZM::m_bIsZM )
 	{
@@ -42,7 +42,7 @@ HookReturnCode ClientDisconnect(CBasePlayer@ pPlayer )
 	PVPTeam::DisconectHook( pPlayer );
 	g_DMUtility.CCommandApplyer(pPlayer,"cl_updaterate 101;cl_cmdrate 132;cl_cmdbackup 1;");
 	
-	g_HitBox.DestroyHitBox(pPlayer);
+	//g_HitBox.DestroyHitBox(pPlayer);
 	
 	g_SvenZM.PlayerDis(pPlayer);
 	return HOOK_HANDLED;
@@ -77,7 +77,7 @@ HookReturnCode PlayerTakeDamage(DamageInfo@ info)
 
 HookReturnCode PlayerSpawn(CBasePlayer@ pPlayer)
 {
-	g_HitBox.PutInServer(pPlayer);
+	//g_HitBox.PutInServer(pPlayer);
 	pPlayer.pev.takedamage = DAMAGE_AIM;
 	g_Arcade.ArcadeRespwan(pPlayer);
 	g_DMClassMode.PlayerSpwanHook(pPlayer);
