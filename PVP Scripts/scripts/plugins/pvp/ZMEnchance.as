@@ -10,6 +10,8 @@
 namespace CZMEnchance
 {
 	const int HUD_CHAN_DAMA = 9;
+	const int ZombieRegenTime = 7;
+	const int ZombieRegenAmount = 100;
 	const string PlayerSpeakPharse = "buy";
 	const array<array<string>> HumanItemKeys = {
 		{"AmmoSupply", "null", "50" },
@@ -210,12 +212,12 @@ namespace CZMEnchance
 					else
 					{
 						const CPlayerEncData@ data = cast<CPlayerEncData@>(pPlayerData[steamId]);
-						if( data.LastDamageTime + 7 <= g_Engine.time )
+						if( data.LastDamageTime + ZombieRegenTime <= g_Engine.time )
 						{
 							if( pPlayer.pev.health < pPlayer.pev.max_health)
 							{
 								if( pPlayer.pev.health + 100 < pPlayer.pev.max_health )
-									pPlayer.pev.health += 100;
+									pPlayer.pev.health += ZombieRegenAmount;
 								else
 									pPlayer.pev.health = pPlayer.pev.max_health;
 								g_SoundSystem.PlaySound( pPlayer.edict(), CHAN_VOICE, "player/heartbeat1.wav", 0.5, ATTN_NORM, 0, 94 + Math.RandomLong( 0,0xF ) );
