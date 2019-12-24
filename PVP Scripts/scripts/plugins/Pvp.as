@@ -12,7 +12,7 @@
 #include "pvp/ReadFiles"
 #include "pvp/Utility"
 #include "pvp/CommandBench"
-#include "pvp/Hitbox"
+//#include "pvp/Hitbox"
 
 //Addition
 #include "pvp/ClassMode"
@@ -59,7 +59,7 @@ void MapInit()
 		
 	g_SurvivalMode.EnableMapSupport();
 
-	g_HitBox.MapInit();
+	//g_HitBox.MapInit();
 	
 	//Put ur call below
 	g_DMDropRule.ApplyDropRule();
