@@ -20,7 +20,8 @@ namespace CSvenZM
 	const int BHopLimit = 400;
 	const bool CanWeBHop = false;
 	const string MapLight = "d";
-	
+	const string NVpharse = "nvsight";
+	const string ZMSkyName = "carnival";
 	const array<array<string>> g_ZMSkill = {{"mp_weapon_droprules", "0"},
 											{"mp_dropweapons", "0"},
 											{"mp_ammo_droprules", "0"},
@@ -829,7 +830,7 @@ class CSvenZM
 				g_EntityFuncs.Remove(pEntity);
 			}
 			
-			g_EntityFuncs.DispatchKeyValue(g_EntityFuncs.IndexEnt(0), "skyname", "carnival" );
+			g_EntityFuncs.DispatchKeyValue(g_EntityFuncs.IndexEnt(0), "skyname", ZMSkyName );
 			//g_Game.AlertMessage( at_console, "foundit\nfoundit\nfoundit\nfoundit\n" );
 		}
 	}
@@ -903,7 +904,7 @@ class CSvenZM
 			CBasePlayer@ pPlayer = pParams.GetPlayer();
 			if(pPlayer !is null)
 			{
-				if((pArguments[0].ToLowercase() == "!nvsight" || pArguments[0] == "/nvsight"))
+				if((pArguments[0].ToLowercase() == "!" + NVpharse || pArguments[0] == "/" + NVpharse))
 				{
 					if(pPlayer.pev.targetname == "zombie")
 					{
