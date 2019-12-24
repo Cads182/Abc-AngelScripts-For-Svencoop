@@ -10,6 +10,7 @@
 namespace CZMEnchance
 {
 	const int HUD_CHAN_DAMA = 9;
+	const string PlayerSpeakPharse = "buy";
 	const array<array<string>> HumanItemKeys = {
 		{"AmmoSupply", "null", "50" },
 		{"ExplodeSupply", "null", "200" },
@@ -318,7 +319,7 @@ class CZMEnchance
 	
 	void ClientSay( CBasePlayer@ pPlayer ,const CCommand@ pArguments )
 	{
-		if(pArguments[0].ToLowercase() == "!buy" || pArguments[0] == "/buy")
+		if(pArguments[0].ToLowercase() == "!" + PlayerSpeakPharse || pArguments[0] == "/" + PlayerSpeakPharse)
 				CZMEnchance::ClientSayHook(pPlayer);
 	}
 }
