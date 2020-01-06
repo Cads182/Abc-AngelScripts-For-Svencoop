@@ -37,12 +37,37 @@ namespace MonsterCounter
 		@entityCheck = g_Scheduler.SetInterval("timer_checkEntities", 1.2f, g_Scheduler.REPEAT_INFINITE_TIMES);
 	}
 
+	int IRelationshipByClass(CLASS&in inClass1, CLASS&in inClass2)
+	{
+		array<array<int8>> relaMap = {
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			{0,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1},
+			{0,1,0,0,0,1,1,1,1,1,1,0,1,1,1,1},
+			{0,1,-2,0,-2,1,1,1,1,1,1,0,0,0,1,1},
+			{0,4,-2,-2,-2,2,1,1,2,1,1,0,0,0,4,4},
+			{0,0,1,1,1,-2,1,2,1,1,1,0,0,0,2,2},
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			{0,1,1,1,1,2,0,-2,0,0,0,0,0,0,1,2},
+			{0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0},
+			{0,0,1,1,1,1,0,0,0,0,4,0,0,0,4,0},
+			{0,0,1,1,1,1,0,0,0,2,0,0,0,0,1,1},
+			{0,4,4,4,4,4,4,0,4,4,4,0,0,0,0,0},
+			{0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1},
+			{0,0,1,1,1,1,0,-2,1,1,0,0,1,0,1,1},
+			{0,1,1,1,1,1,1,1,0,1,1,0,0,0,-2,-2},
+			{0,1,2,1,1,2,1,2,0,0,1,0,0,0,-2,-2}
+		};
+		int a = Math.clamp(0,15,inClass1);
+		int b = Math.clamp(0,15,inClass2);
+		return relaMap[a][b];
+	}
+
 	void timer_checkEntities()
 	{
 		CBaseEntity@ pMonster = null;
 		while((@pMonster = g_EntityFuncs.FindEntityByClassname(pMonster, "monster_*")) !is null)
 		{
-			int relationship = pMonster.IRelationshipByClass(CLASS_PLAYER);
+			int relationship = IRelationshipByClass(CLASS(pMonster.Classify()), CLASS_PLAYER);
 			if(pMonster.IsAlive() && relationship != R_AL && relationship != R_NO && checkClassname(pMonster) )
 			{
 				EHandle thisHandle = pMonster;
