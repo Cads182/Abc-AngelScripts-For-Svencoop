@@ -89,9 +89,10 @@ namespace MonsterCounter
 			{
 				for(int8 j=0; j< Math.RandomLong(1,3); j++)
 				{
-					CBaseEntity@ pAmmo = g_EntityFuncs.Create("item_paydayammoclip", monsterPos[i],Vector(Math.RandomLong (-25,25),Math.RandomLong (-25,25),Math.RandomLong (-25,25)), false);
-					pAmmo.pev.velocity = g_Engine.v_forward * Math.RandomLong (-200,200) + g_Engine.v_up * Math.RandomLong (-200,200) + g_Engine.v_right * Math.RandomLong (-200,200);
-					pAmmo.pev.angles = Math.VecToAngles( pAmmo.pev.velocity );
+					CBaseEntity@ pAmmo = g_EntityFuncs.Create("item_paydayammoclip", monsterPos[i],Vector(Math.RandomLong (-25,25),Math.RandomLong (-25,25),Math.RandomLong (-25,25)), true);
+						pAmmo.pev.velocity = g_Engine.v_forward * Math.RandomLong (-200,200) + g_Engine.v_up * Math.RandomLong (-200,200) + g_Engine.v_right * Math.RandomLong (-200,200);
+						pAmmo.pev.angles = Math.VecToAngles( pAmmo.pev.velocity );
+					g_EntityFuncs.DispatchSpawn( pAmmo.edict() );
 				}
 				monsterHandle.removeAt(i);
 				monsterPos.removeAt(i);
